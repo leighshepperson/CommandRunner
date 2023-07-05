@@ -59,7 +59,3 @@ You can also list all scripts and their parameters with the `--list` flag:
 ```
 
 This will print all the YAML files in the current directory, their commands, parameters, and help messages.
-
----
-
-This README assumes that the name of the application is `command_runner`. Replace this with the actual name of your application as needed.
