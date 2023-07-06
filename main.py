@@ -5,10 +5,68 @@ import getpass
 import glob
 import os
 
+import yaml
+import argparse
+import subprocess
+import getpass
+import glob
+import os
+
+def load_config(script_name, common_dir='common_scripts', user_dir='user_scripts'):
+    # Start with the common config
+    common_path = os.path.join(common_dir, f"{script_name}.yaml")
+    if os.path.isfile(common_path):
+        with open(common_path, 'r') as file:
+            configs = list(yaml.safe_load_all(file))
+    else:
+        configs = []
+
+    # Override with the user config
+    user_path = os.path.join(user_dir, f"{script_name}.yaml")
+    if os.path.isfile(user_path):
+        with open(user_path, 'r') as file:
+            user_configs = list(yaml.safe_load_all(file))
+            configs.extend(user_configs)
+
+    return configs
+
+# ... rest of your program remains the same
+
+
 def load_config(script_name):
     with open(f"{script_name}.yaml", 'r') as file:
         configs = list(yaml.safe_load_all(file))
     return configs
+
+# ...
+
+def fill_params(config):
+    filled_params = {}
+    for key, value in config["params"].items():
+        if isinstance(value.get("value"), bool):
+            filled_value = value["value"]
+        elif value.get("value") == "PROMPT":
+            if value.get("secret"):
+                filled_value = getpass.getpass(f"Enter value for {key}: ")
+            else:
+                filled_value = input(f"Enter value for {key}: ")
+        elif "value" in value:
+            filled_value = value["value"]
+        else:
+            filled_value = value.get("default")
+        filled_params[key] = filled_value
+    return filled_params
+
+def create_command(script_name, params):
+    command_template = config["command_template"]
+    for key, value in params.items():
+        if isinstance(value, bool):
+            params[key] = '' if value else None
+    filled_command = command_template.format(**params)
+    return filled_command
+
+# ...
+
 
 def fill_params(config):
     filled_params = {}
